@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:financial_tracker/helper/transaction_fake_repository.dart';
 
 import '../../common/errors/errors_classes.dart';
+import '../../common/errors/errors_messagens.dart';
 import '../../common/patterns/result.dart';
 import '../../domain/entity/transaction_entity.dart';
 import 'transaction_storage_contract.dart';
@@ -17,29 +18,23 @@ class TransactionFakeServiceImpl implements TransactionStorageContract {
 
       final List<dynamic> jsonList = jsonDecode(result);
 
-      final transactions =
-          jsonList
-              .map(
-                (item) =>
-                    TransactionEntity.fromMap(item as Map<String, dynamic>),
-              )
-              .toList();
-      return Success(transactions); // Retorna um exemplo.
+      final transactions = jsonList
+          .map(
+            (item) => TransactionEntity.fromMap(item as Map<String, dynamic>),
+          )
+          .toList();
+      return Success(transactions);
     } on DatasourceResultEmpty catch (e) {
-      // Retorna erro em caso de falha.
-      return Error(DatasourceResultEmpty(e.toString()));
+      return Error(DatasourceResultEmpty(e.msg));
     } on APIFailure catch (e) {
-      // Retorna erro em caso de falha.
-      return Error(APIFailure(e.toString()));
-    } on Exception catch (e) {
-      // Retorna erro em caso de falha.
-      return Error(DefaultError('Erro ao buscar o estudante: ${e.toString()}'));
+      return Error(APIFailure(e.msg));
+    } catch (e) {
+      return Error(DefaultError('${MessagesError.defaultError}: ${e.toString()}'));
     }
   }
 
   @override
   Future<Result<TransactionEntity, Failure>> fetchTransacion(String id) {
-    // TODO: implement fetchTransacion
     throw UnimplementedError();
   }
 
@@ -47,7 +42,6 @@ class TransactionFakeServiceImpl implements TransactionStorageContract {
   Future<Result<List<TransactionEntity>, Failure>> fetchTransacionsByTipe(
     TransactionType type,
   ) {
-    // TODO: implement fetchTransacionsByTipe
     throw UnimplementedError();
   }
 
@@ -55,17 +49,13 @@ class TransactionFakeServiceImpl implements TransactionStorageContract {
   Future<Result<void, Failure>> removeTransacion(String id) async {
     try {
       await _api.deleteData(id);
-
       return Success(null);
     } on RecordNotFound catch (e) {
-      // Retorna erro em caso de falha.
-      return Error(RecordNotFound('Na Exclusão: ${e.toString()}'));
+      return Error(RecordNotFound(e.msg));
     } on APIFailure catch (e) {
-      // Retorna erro em caso de falha.
-      return Error(APIFailure(e.toString()));
-    } on Exception catch (e) {
-      // Retorna erro em caso de falha.
-      return Error(DefaultError('Erro ao buscar o estudante: ${e.toString()}'));
+      return Error(APIFailure(e.msg));
+    } catch (e) {
+      return Error(DefaultError('${MessagesError.defaultError}: ${e.toString()}'));
     }
   }
 
@@ -75,17 +65,13 @@ class TransactionFakeServiceImpl implements TransactionStorageContract {
   ) async {
     try {
       await _api.addData(transaction.toJson());
-
       return Success(null);
     } on InvalidData catch (e) {
-      // Retorna erro em caso de falha.
-      return Error(InvalidData('Na Inclusão: ${e.toString()}'));
+      return Error(InvalidData(e.msg));
     } on APIFailure catch (e) {
-      // Retorna erro em caso de falha.
-      return Error(APIFailure(e.toString()));
-    } on Exception catch (e) {
-      // Retorna erro em caso de falha.
-      return Error(DefaultError('Erro ao buscar o estudante: ${e.toString()}'));
+      return Error(APIFailure(e.msg));
+    } catch (e) {
+      return Error(DefaultError('${MessagesError.defaultError}: ${e.toString()}'));
     }
   }
 
@@ -99,23 +85,34 @@ class TransactionFakeServiceImpl implements TransactionStorageContract {
 
       final List<dynamic> jsonList = jsonDecode(result);
 
-      final transactions =
-          jsonList
-              .map(
-                (item) =>
-                    TransactionEntity.fromMap(item as Map<String, dynamic>),
-              )
-              .toList();
-      return Success(transactions); // Retorna um exemplo.
+      final transactions = jsonList
+          .map(
+            (item) => TransactionEntity.fromMap(item as Map<String, dynamic>),
+          )
+          .toList();
+      return Success(transactions);
     } on DatasourceResultEmpty catch (e) {
-      // Retorna erro em caso de falha.
-      return Error(DatasourceResultEmpty(e.toString()));
+      return Error(DatasourceResultEmpty(e.msg));
     } on APIFailure catch (e) {
-      // Retorna erro em caso de falha.
-      return Error(APIFailure(e.toString()));
-    } on Exception catch (e) {
-      // Retorna erro em caso de falha.
-      return Error(DefaultError('Erro ao Transações: ${e.toString()}'));
+      return Error(APIFailure(e.msg));
+    } catch (e) {
+      return Error(DefaultError('${MessagesError.defaultError}: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Result<void, Failure>> updateTransaction(TransactionEntity transaction) async {
+    print('Chamando update para transação: ${transaction.id}');
+    try {
+      final json = jsonEncode(transaction.toMap());
+      await _api.updateData(json);
+      return Success(null);
+    } on RecordNotFound catch (e) {
+      return Error(RecordNotFound(e.msg));
+    } on APIFailureOnSave catch (e) {
+      return Error(APIFailureOnSave(e.msg));
+    } catch (e) {
+      return Error(DefaultError('${MessagesError.defaultError}: ${e.toString()}'));
     }
   }
 }

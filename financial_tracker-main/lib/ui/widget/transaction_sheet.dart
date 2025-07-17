@@ -17,11 +17,14 @@ class TransactionSheet extends StatelessWidget {
   /// Função callback quando a transação é submetida
   // final Function(TransactionEntity newTransaction) onSubmit;
 
+  final TransactionEntity? initialTransaction;
+
   const TransactionSheet({
     super.key,
     required this.type,
     // required this.onSubmit,
     required this.submitCommand,
+    this.initialTransaction,
   });
 
   /// Método auxiliar para exibir o bottom sheet como um modal
@@ -30,6 +33,7 @@ class TransactionSheet extends StatelessWidget {
     required TransactionType type,
     // required Function(TransactionEntity newTransaction) onSubmit,
     required Command1<void, Failure, TransactionEntity> submitCommand,
+    TransactionEntity? initialTransaction,
   }) async {
     return showModalBottomSheet(
       context: context,
@@ -40,6 +44,7 @@ class TransactionSheet extends StatelessWidget {
             type: type,
             // onSubmit: onSubmit,
             submitCommand: submitCommand,
+            initialTransaction: initialTransaction,
           ),
     );
   }
@@ -126,6 +131,7 @@ class TransactionSheet extends StatelessWidget {
                   type: type,
                   color: color,
                   submitCommand: submitCommand,
+                  initialTransaction: initialTransaction,
                   // onSubmit: (newTransaction) {
                   //   onSubmit(newTransaction);
                   //   Navigator.pop(context); // Fecha o bottom sheet

@@ -1,3 +1,5 @@
+import 'package:financial_tracker/ui/widget/edit_transaction_form.dart';
+
 import '../../common/config/dependencies.dart';
 import '../../common/types/date_filter_type.dart';
 import '../../domain/entity/transaction_entity.dart';
@@ -176,6 +178,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 onDelete: (id) {
                   viewModelController.deleteTransaction.execute(id);
                 },
+
+                onEdit: (tx) {
+                  _showEditSheet(context, tx); //Método novo
+                },
+
                 undoDelete: viewModelController.undoDelectedTransaction,
                 scaffoldContext: context,
               );
@@ -246,6 +253,9 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       type: TransactionType.income,
       submitCommand: viewModelController.saveTransaction,
+
+      
+
       // onSubmit: (newTransaction) {
       //   viewModelController.saveTransaction.execute(newTransaction);
       // },
@@ -271,4 +281,19 @@ class _HomeScreenState extends State<HomeScreen> {
       // },
     );
   }
+
+  
+  void _showEditSheet(BuildContext context, TransactionEntity tx) {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => EditTransactionForm(
+        transaction: tx,
+        onSave: (updateTx) {
+          viewModelController.updateTransaction.execute(updateTx);
+        },
+      ),
+    );
+  }
+
+
 }

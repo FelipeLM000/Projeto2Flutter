@@ -14,6 +14,11 @@ class TransactionCardSheets extends StatefulWidget {
   final Function(String id)
   onDelete; // Callback para deletar uma transação pelo ID
 
+
+  final void Function(TransactionEntity) 
+  onEdit; // Callback para editar uma transação
+
+
   final Command1<void, Failure, TransactionEntity>
   undoDelete; // Callback para desfazer exclusão
   final BuildContext
@@ -26,6 +31,9 @@ class TransactionCardSheets extends StatefulWidget {
     required this.onDelete,
     required this.undoDelete,
     required this.scaffoldContext,
+
+    required this.onEdit //adicionado para edição de transação
+
   });
 
   @override
@@ -328,15 +336,28 @@ class _TransactionCardSheetsState extends State<TransactionCardSheets>
                   Formatter.formatDate(transaction.date), // Data formatada
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
-                trailing: Text(
-                  Formatter.formatCurrency(
-                    transaction.amount,
-                  ), // Valor formatado em moeda
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: color, // Cor do texto conforme tipo
-                  ),
-                ),
+
+
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      Formatter.formatCurrency(transaction.amount),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.edit, size: 20),
+                      tooltip: 'Editar transação',
+                      onPressed:() => widget.onEdit(transaction),
+                    ),
+                  ],
+                ), 
+                // Mudança de trailing text para row, permitindo a adição de um botão de edição
+
               ),
             ),
           );

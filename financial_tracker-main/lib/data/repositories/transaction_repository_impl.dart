@@ -46,4 +46,20 @@ class TransactionRepositoryImpl implements TransactionRepositoryContract {
   ) {
     return _dataSource.fetchTransacionsByDate(startDate, endDate);
   }
+  
+  @override
+Future<Result<void, Failure>> updateTransaction(TransactionEntity transaction) async {
+  try {
+    final index = _transactions.indexWhere((t) => t.id == transaction.id);
+    if (index == -1) return FailureResult(RecordNotFound());
+
+    _transactions[index] = transaction;
+    return SuccessResult(null); // ou SuccessResult<void>(null);
+  } catch (e) {
+    return FailureResult(DefaultError(e.toString()));
+  }
+}
+ 
+
+  
 }

@@ -17,17 +17,8 @@ class TransactionFakeRepository {
       (index) => TransactionFakeFactory.factory(),
     );
   }
-  // StudentFakeApiDataBase() {
-  //   if (Random().nextBool()) {
-  //     student = StudenteFakeFactory.factory();
-  //   }
-  // }
 
   Future<String> getData() async {
-    // if (Random().nextBool()) {
-    //   return throw APIFailure(MessagesError.apiError);
-    // }
-
     return (transactions.isEmpty)
         ? throw DatasourceResultEmpty(MessagesError.emptySharedP)
         : jsonEncode(transactions.map((e) => e.toMap()).toList());
@@ -81,12 +72,41 @@ class TransactionFakeRepository {
     return jsonEncode(filteredTransactions.map((e) => e.toMap()).toList());
   }
 
-  // Future<bool> updateData(String studentJson) async {
-  //   try {
-  //     student = StudentInfoEntity.fromJson(studentJson);
-  //     return true;
-  //   } catch (e) {
-  //     throw APIFailureOnSave('erro ao salvar: ${e.toString()}');
-  //   }
-  // }
+  Future<void> updateData(String transactionJson) async {
+    try {
+      final updated = TransactionEntity.fromMap(jsonDecode(transactionJson));
+
+      final index = transactions.indexWhere((t) => t.id == updated.id);
+      if (index == -1) {
+        throw RecordNotFound(MessagesError.recordNotFound);
+      }
+
+      transactions[index] = updated;
+    } catch (e) {
+      throw APIFailureOnSave('Erro ao salvar: ${e.toString()}');
+    }
+  }
+
+  Future<String> getDataById(String id) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    final transaction = transactions.firstWhere(
+      (tx) => tx.id == id,
+      orElse: () => throw RecordNotFound(MessagesError.recordNotFound),
+    );
+    return jsonEncode(transaction.toMap());
+  }
+
+  Future<String> getDataByType(TransactionType type) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    final filteredTransactions =
+        transactions.where((tx) => tx.type == type).toList();
+
+    if (filteredTransactions.isEmpty) {
+      throw DatasourceResultEmpty(MessagesError.emptySearch);
+    }
+
+    return jsonEncode(filteredTransactions.map((e) => e.toMap()).toList());
+  }
+
+  
 }

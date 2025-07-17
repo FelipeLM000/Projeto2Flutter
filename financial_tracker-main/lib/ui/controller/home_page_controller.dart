@@ -23,6 +23,9 @@ class HomePageController {
     undoDelectedTransaction = Command1(_undoDelectedTransaction);
     deleteTransaction = Command1(_deleteTransaction);
     //loadSample = Command0<void, void>(_resetToSample);
+
+    updateTransaction = Command1(_updateTransaction);
+
     incomes = Computed(
       () =>
           _transactions.value
@@ -62,9 +65,11 @@ class HomePageController {
   late final Command1<void, Failure, TransactionEntity> saveTransaction;
   late final Command1<void, Failure, TransactionEntity> undoDelectedTransaction;
   late final Command1<void, Failure, String> deleteTransaction;
-  late final Command2<List<TransactionEntity>, Failure, DateTime, DateTime>
-  searchTransactionsByDate;
+  late final Command2<List<TransactionEntity>, Failure, DateTime, DateTime> searchTransactionsByDate;
   //late final Command0<void, void> loadSample;
+
+  late final Command1<void, Failure, TransactionEntity> updateTransaction;
+
 
   // signals
   final Signal<List<TransactionEntity>> _transactions = Signal([]);
@@ -143,7 +148,17 @@ class HomePageController {
     ));
 
     if (result.isSuccess) {
-      _transactions.value = [..._transactions.value, transaction];
+      final existingIndex = _transactions.value.indexWhere((t) => t.id == transaction.id);
+
+      if (existingIndex != -1) {
+        //se já existe, substitui
+        final updatedList = [..._transactions.value];
+        updatedList[existingIndex] = transaction;
+        _transactions.value = updatedList;
+      } else {
+        //se não existe, adiciona nova
+        _transactions.value = [..._transactions.value, transaction];
+      }
     }
 
     return result;
@@ -200,6 +215,24 @@ class HomePageController {
 
     return result;
   }
+
+
+  Future<Result<void, Failure>> _updateTransaction(TransactionEntity updated) async {
+    final result = await _transactionsUseCases.updateTransaction.call((transaction: updated));
+
+    if (result.isSuccess) {
+      final list = [..._transactions.value];
+      final index = list.indexWhere((e) => e.id == updated.id);
+
+      if (index != -1) {
+        list[index] = updated; // subtitui a transação antiga pela nova
+        _transactions.value = list; // atualiza o signal
+      }
+    }
+
+    return result;
+  }
+
 
   /// Alterna a visibilidade do filtro de transações.
   void toggleFilterVisibility() {
